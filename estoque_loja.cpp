@@ -1,3 +1,8 @@
+//Disciplina: Introducao aos Algoritmos
+//Nomes: Alisson Grilo, Diogo Carrer e Matheus Megale
+//Professora: Juliana Greghi
+//Enunciado 3 - Estoque Loja
+
 #include <iostream>
 #include <stdlib.h>
 #include <string.h>
@@ -23,6 +28,20 @@ struct produto {
 
     fornecedorProduto fornecedor;
 };
+
+
+void escreveMenu(){
+    cout<<"CONTROLE DE ESTOQUE"<<endl;
+    cout<<"Informe a opcao desejada:"<<endl;
+    cout<<"1. Cadastrar produto"<<endl;
+    cout<<"2. Consultar produto"<<endl;
+    cout<<"3. Listar produtos cadastrados disponiveis (ordenados pelo codigo do produto)"<<endl;
+    cout<<"4. Excluir um produto"<<endl;
+    cout<<"5. Efetuar uma venda"<<endl;
+    cout<<"6. Listar dados de produtos ativos em estoque"<<endl;
+    cout<<"7. Exportar dados de produtos ativos em estoque"<<endl;
+    cout<<"8. Sair"<<endl;
+}
 
 
 void quickSort(produto produtos[], int primeiro, int ultimo){
@@ -63,44 +82,11 @@ void quickSort(produto produtos[], int primeiro, int ultimo){
 }
 
 
-void escreveProdutoCadastrado(produto produtos[], int tamanho){
-    quickSort (produtos, 0, tamanho-1);
-    
-    for (int i = 0; i<tamanho; i++){
-        cout<<"Descricao: "<<produtos[i].descricaoProduto<<endl;
-        cout<<"Codigo: "<<produtos[i].codProduto<<endl;
-        cout<<"Fornecedor: "<<produtos[i].fornecedor.nomeFornecedor<<endl;
-        
-        for (int j = 0; j<2; j++){
-            cout<<"E-mail "<<j+1<<": "<<produtos[i].fornecedor.emailFornecedor[j]<<endl;
-        }
-
-        cout<<"Situacao: "<<produtos[i].situacaoProduto<<endl;
-        cout<<endl;
-    }
-}
-
-
-void escreveMenu(){
-    cout<<"| CONTROLE DE ESTOQUE |"<<endl;
-    cout<<"Informe a opcao desejada:"<<endl;
-    cout<<"1. Cadastrar produto"<<endl;
-    cout<<"2. Consultar produto"<<endl;
-    cout<<"3. Listar produtos cadastrados disponiveis (ordenados pelo codigo do produto)"<<endl;
-    cout<<"4. Excluir um produto"<<endl;
-    cout<<"5. Efetuar uma venda"<<endl;
-    cout<<"6. Listar dados de produtos ativos em estoque"<<endl;
-    cout<<"7. Exportar dados de produtos ativos em estoque"<<endl;
-    cout<<"8. Sair"<<endl;
-}
-
-
-void preencheEstrutura(produto produtos[], int capacidade){
+void preencheEstrutura(produto produtos[], int capacidade){ 
     for (int i = capacidade-3; i<capacidade; i++){
         for (int j = 0; j<2; j++){
             produtos[i].fornecedor.emailFornecedor[j] = '-';
         }
-
         produtos[i].qtdProdutoVendido = 0;
     }
 }
@@ -114,22 +100,6 @@ produto* redimensiona(produto *produtos, int &capacidade){
     preencheEstrutura(produtosNovo, capacidade);
 
     return produtosNovo;
-}
-
-
-bool ehCadastrado(produto produtos[], string auxiliar, int &tamanho){
-    for(int j=0; j<tamanho; j++){
-        if (auxiliar == produtos[j].codProduto) return 1;
-    }
-    return 0;
-}
-
-
-void escreveProduto(produto produtos[], int indice){
-    cout<<"Codigo do produto: "<<produtos[indice].codProduto<<endl;
-    cout<<"Quantidade disponivel: "<<produtos[indice].qtdProdutoDisponivel<<endl;
-    cout<<"Quantidade vendida: "<<produtos[indice].qtdProdutoVendido<<endl;
-    cout<<"Situacao: "<<produtos[indice].situacaoProduto<<endl;
 }
 
 
@@ -147,6 +117,102 @@ int buscaBinaria(produto produtos[], int inicio, int tamanho, string codBusca, b
         }
     }
     return -1;
+}
+
+
+bool ehCadastrado(produto produtos[], string auxiliar, int &tamanho){
+    for(int j=0; j<tamanho; j++){
+        if (auxiliar == produtos[j].codProduto) return 1;
+    }
+    return 0;
+}
+
+
+void cadastraProduto(produto produtos[], int &tamanho){ 
+    string auxiliar;
+    int qtdEmails;
+
+    cin.ignore();
+    
+    cout<<"Descricao do produto: ";
+    getline(cin, produtos[tamanho].descricaoProduto);
+
+    cout<<"Codigo de identificacao: ";
+    cin>>auxiliar;
+
+    if (ehCadastrado(produtos, auxiliar, tamanho)){
+        cout<<"ERRO! Codigo de produto ja cadastrado no sistema"<<endl;
+    } else{
+        produtos[tamanho].codProduto = auxiliar;
+
+        cout<<"Quantidade disponivel: ";
+        cin>>produtos[tamanho].qtdProdutoDisponivel;
+
+        cout<<"Preco unitario: ";
+        cin>>produtos[tamanho].precoProduto;
+        
+        cout<<"Nome do fornecedor: ";
+        cin.ignore();
+        getline(cin, produtos[tamanho].fornecedor.nomeFornecedor);
+
+        cout<<"Informe quantos emails deseja cadastrar (MAX: 2): ";
+        cin>>qtdEmails;
+        
+        cout<<"Informe seu(s) email(s): ";
+        for (int i = 0; i<qtdEmails; i++){        
+            cin>>produtos[tamanho].fornecedor.emailFornecedor[i];
+        }
+
+        cout<<"Telefone: ";
+        cin>>produtos[tamanho].fornecedor.telefoneFornecedor;
+        
+        cout<<"Situacao: ";
+        cin>>produtos[tamanho].situacaoProduto;
+
+        cout<<"Cadastro efetuado com sucesso!"<<endl;
+        tamanho++;
+    }
+}
+
+
+void escreveProduto(produto produtos[], int indice){ 
+    cout<<"Codigo do produto: "<<produtos[indice].codProduto<<endl;
+    cout<<"Quantidade disponivel: "<<produtos[indice].qtdProdutoDisponivel<<endl;
+    cout<<"Quantidade vendida: "<<produtos[indice].qtdProdutoVendido<<endl;
+    cout<<"Situacao: "<<produtos[indice].situacaoProduto<<endl;
+}
+
+
+void consultaProduto(produto produtos[], int tamanho, string codBusca){
+    int indice;
+    bool achou = false;
+
+    quickSort (produtos, 0, tamanho-1);
+
+    indice = buscaBinaria(produtos, 0, tamanho, codBusca, achou);
+
+    if (!achou)
+        cout<<"Codigo do produto: "<<codBusca<<endl<<"Situacao: Produto nao cadastrado"<<endl;
+    else
+        escreveProduto(produtos, indice);
+}
+
+
+void escreveProdutoCadastrado(produto produtos[], int tamanho){
+    quickSort (produtos, 0, tamanho-1);
+    
+    for (int i = 0; i<tamanho; i++){
+        cout<<"Descricao: "<<produtos[i].descricaoProduto<<endl;
+        cout<<"Codigo: "<<produtos[i].codProduto<<endl;
+        cout<<"Fornecedor: "<<produtos[i].fornecedor.nomeFornecedor<<endl;
+        
+        for (int j = 0; j<2; j++){
+            cout<<"E-mail "<<j+1<<": "<<produtos[i].fornecedor.emailFornecedor[j]<<endl;
+        }
+
+        cout<<"Situacao: "<<produtos[i].situacaoProduto<<endl;
+        cout<<endl;
+    }
 }
 
 
@@ -173,66 +239,6 @@ void excluiProduto(produto produtos[], int tamanho, string codBusca){
         } else if (confirmacao == 2){
             cout<<"Situacao: "<<produtos[indice].situacaoProduto<<endl;
         }
-    }
-}
-
-
-void consultaProduto(produto produtos[], int tamanho, string codBusca){
-    int indice;
-    bool achou = false;
-
-    quickSort (produtos, 0, tamanho-1);
-
-    indice = buscaBinaria(produtos, 0, tamanho, codBusca, achou);
-
-    if (!achou)
-        cout<<"Codigo do produto: "<<codBusca<<endl<<"Situacao: Produto nao cadastrado"<<endl;
-    else
-        escreveProduto(produtos, indice);
-}
-
-
-void cadastraProduto(produto produtos[], int &tamanho){
-    string auxiliar;
-    int qtdEmails;
-
-    cout<<"Descricao do produto: ";
-    cin>>produtos[tamanho].descricaoProduto;
-
-    cout<<"Codigo de identificacao: ";
-    cin>>auxiliar;
-
-    if (ehCadastrado(produtos, auxiliar, tamanho)){
-        cout<<"ERRO! Codigo de produto ja cadastrado no sistema"<<endl;
-    } else{
-        produtos[tamanho].codProduto = auxiliar;
-
-        cout<<"Quantidade disponivel: ";
-        cin>>produtos[tamanho].qtdProdutoDisponivel;
-
-        cout<<"Preco unitario: ";
-        cin>>produtos[tamanho].precoProduto;
-        
-        cout<<"| Fornecedor |"<<endl;
-        cout<<"Nome: ";
-        cin>>produtos[tamanho].fornecedor.nomeFornecedor;
-
-        cout<<"Informe quantos emails deseja cadastrar (MAX: 2): ";
-        cin>>qtdEmails;
-        
-        cout<<"Informe seu(s) email(s): ";
-        for (int i = 0; i<qtdEmails; i++){        
-            cin>>produtos[tamanho].fornecedor.emailFornecedor[i];
-        }
-
-        cout<<"Telefone: ";
-        cin>>produtos[tamanho].fornecedor.telefoneFornecedor;
-        
-        cout<<"Situacao: ";
-        cin>>produtos[tamanho].situacaoProduto;
-
-        cout<<"Cadastro efetuado com sucesso!"<<endl;
-        tamanho++;
     }
 }
 
@@ -298,7 +304,7 @@ int main(){
     tamanho = 0; 
 
     produto *produtos = new produto[capacidade];
-    ofstream arquivo("arquivo.dat");
+    ofstream arquivo("arquivo.txt");
     preencheEstrutura(produtos, capacidade);
 
     do{
