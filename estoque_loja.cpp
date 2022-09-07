@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <algorithm>
-
+#include <fstream>
 using namespace std;
 
 struct fornecedorProduto{
@@ -11,11 +11,13 @@ struct fornecedorProduto{
     string emailFornecedor[2];
 };
 
+
 struct produto {
     string descricaoProduto;
     string marcaProduto;
     string codProduto;
     string situacaoProduto;
+    int qtdProdutoVendido;
     int qtdProdutoDisponivel;
     float precoProduto;
 
@@ -43,6 +45,7 @@ void quickSort(produto produtos[], int primeiro, int ultimo){
             swap(produtos[i].precoProduto, produtos[j].precoProduto);
             swap(produtos[i].qtdProdutoDisponivel, produtos[j].qtdProdutoDisponivel);
             swap(produtos[i].situacaoProduto, produtos[j].situacaoProduto);
+            swap(produtos[i].qtdProdutoVendido, produtos[j].qtdProdutoVendido);
             swap(produtos[i].fornecedor.nomeFornecedor, produtos[j].fornecedor.nomeFornecedor);
             swap(produtos[i].fornecedor.emailFornecedor[0], produtos[j].fornecedor.emailFornecedor[0]);
             swap(produtos[i].fornecedor.emailFornecedor[1], produtos[j].fornecedor.emailFornecedor[1]);
@@ -58,6 +61,7 @@ void quickSort(produto produtos[], int primeiro, int ultimo){
     if (i < ultimo)
         quickSort(produtos, i, ultimo);
 }
+
 
 void escreveProdutoCadastrado(produto produtos[], int tamanho){
     quickSort (produtos, 0, tamanho-1);
@@ -76,6 +80,7 @@ void escreveProdutoCadastrado(produto produtos[], int tamanho){
     }
 }
 
+
 void escreveMenu(){
     cout<<"| CONTROLE DE ESTOQUE |"<<endl;
     cout<<"Informe a opcao desejada:"<<endl;
@@ -89,10 +94,15 @@ void escreveMenu(){
     cout<<"8. Sair"<<endl;
 }
 
-void preencheEmail(produto produtos[], int capacidade){
-    for (int i = capacidade-3; i<capacidade; i++)
-        for (int j = 0; j<2; j++)
+
+void preencheEstrutura(produto produtos[], int capacidade){
+    for (int i = capacidade-3; i<capacidade; i++){
+        for (int j = 0; j<2; j++){
             produtos[i].fornecedor.emailFornecedor[j] = '-';
+        }
+
+        produtos[i].qtdProdutoVendido = 0;
+    }
 }
 
 
@@ -101,7 +111,7 @@ produto* redimensiona(produto *produtos, int &capacidade){
     copy(produtos, produtos+capacidade, produtosNovo);
     capacidade += 3;
 
-    preencheEmail(produtosNovo, capacidade);
+    preencheEstrutura(produtosNovo, capacidade);
 
     return produtosNovo;
 }
@@ -114,35 +124,73 @@ bool ehCadastrado(produto produtos[], string auxiliar, int &tamanho){
     return 0;
 }
 
+
 void escreveProduto(produto produtos[], int indice){
     cout<<"Codigo do produto: "<<produtos[indice].codProduto<<endl;
     cout<<"Quantidade disponivel: "<<produtos[indice].qtdProdutoDisponivel<<endl;
-    //INSERIR QTD VENDIDA
+    cout<<"Quantidade vendida: "<<produtos[indice].qtdProdutoVendido<<endl;
     cout<<"Situacao: "<<produtos[indice].situacaoProduto<<endl;
 }
 
-int consultaProduto(produto produtos[], int inicio, int tamanho, string codBusca){
-    int meio;
-    bool achou = false;
 
-    quickSort (produtos, 0, tamanho-1);
-    
+int buscaBinaria(produto produtos[], int inicio, int tamanho, string codBusca, bool &achou){
+    int meio;
     while(inicio <= tamanho and !achou){
         meio = (inicio + tamanho) / 2;
         if (produtos[meio].codProduto == codBusca){
             achou = true;
+            return meio;
         } else if (produtos[meio].codProduto < codBusca){
             inicio = meio + 1;
         } else {
             tamanho = meio - 1;
         }
     }
+    return -1;
+}
+
+
+void excluiProduto(produto produtos[], int tamanho, string codBusca){
+    int indice;
+    bool achou = false;
+    int confirmacao;
+
+    quickSort (produtos, 0, tamanho-1);
+
+    indice = buscaBinaria(produtos, 0, tamanho, codBusca, achou);
+
+    if (!achou or produtos[indice].situacaoProduto == "Inativo"){
+        cout<<"Produto nao cadastrado ou inativo"<<endl;
+    } else{
+        cout<<"Codigo do produto: "<<produtos[indice].codProduto<<endl;
+        cout<<"Descricao: "<<produtos[indice].descricaoProduto<<endl;
+        cout<<"Confirma exclusao? 1-sim 2-nao"<<endl;
+        cin>>confirmacao;
+        if (confirmacao == 1){
+            produtos[indice].situacaoProduto = "Inativo";
+            cout<<"Situacao: "<<produtos[indice].situacaoProduto<<endl;
+            cout<<"Produto excluido com sucesso!"<<endl;
+        } else if (confirmacao == 2){
+            cout<<"Situacao: "<<produtos[indice].situacaoProduto<<endl;
+        }
+    }
+}
+
+
+void consultaProduto(produto produtos[], int tamanho, string codBusca){
+    int indice;
+    bool achou = false;
+
+    quickSort (produtos, 0, tamanho-1);
+
+    indice = buscaBinaria(produtos, 0, tamanho, codBusca, achou);
 
     if (!achou)
-        cout<<"Produto nao cadastrado"<<endl;
+        cout<<"Codigo do produto: "<<codBusca<<endl<<"Situacao: Produto nao cadastrado"<<endl;
     else
-        escreveProduto(produtos, meio);
+        escreveProduto(produtos, indice);
 }
+
 
 void cadastraProduto(produto produtos[], int &tamanho){
     string auxiliar;
@@ -189,6 +237,58 @@ void cadastraProduto(produto produtos[], int &tamanho){
 }
 
 
+void efetuaVenda(produto produtos[], int tamanho, string codBusca){
+    int qtdVendida;
+    int indice;
+    bool achou = false;
+
+    quickSort (produtos, 0, tamanho-1);
+    
+    indice = buscaBinaria(produtos, 0, tamanho, codBusca, achou);
+
+    if (!achou){
+        cout<<"Produto nao cadastrado"<<endl;
+    } else {
+        cout<<"Informe a quantidade a ser vendida: ";
+        cin>>qtdVendida;
+        if (qtdVendida <= produtos[indice].qtdProdutoDisponivel and produtos[indice].situacaoProduto == "Ativo"){
+            produtos[indice].qtdProdutoVendido += qtdVendida;
+            produtos[indice].qtdProdutoDisponivel -= qtdVendida;
+            
+            cout<<"Codigo: "<<produtos[indice].codProduto<<endl;
+            cout<<"Descricao: "<<produtos[indice].descricaoProduto<<endl;
+            cout<<"Quantidade vendida: "<<produtos[indice].qtdProdutoVendido<<endl;
+            cout<<"Quantidade em estoque: "<<produtos[indice].qtdProdutoDisponivel<<endl;
+            cout<<"Venda realizada com sucesso!"<<endl;
+        } else {
+            cout<<"Codigo: "<<produtos[indice].codProduto<<endl;
+            cout<<"Descricao: "<<produtos[indice].descricaoProduto<<endl;
+            cout<<"Quantidade em estoque: "<<produtos[indice].qtdProdutoDisponivel<<endl;
+            cout<<"Situacao: "<<produtos[indice].situacaoProduto<<endl;
+            cout<<"Quantidade nao disponivel em estoque ou produto inativo"<<endl;
+        }
+    }
+}
+
+
+void escreveProdutoAtivo(produto produtos[], int tamanho){
+    quickSort (produtos, 0, tamanho-1);
+    
+    for (int i = 0; i<tamanho; i++){
+        if (produtos[i].situacaoProduto == "Ativo"){
+            cout<<"Descricao: "<<produtos[i].descricaoProduto<<endl;
+            cout<<"Codigo: "<<produtos[i].codProduto<<endl;
+            cout<<"Fornecedor: "<<produtos[i].fornecedor.nomeFornecedor<<endl;
+            for (int j = 0; j<2; j++){
+                cout<<"E-mail "<<j+1<<": "<<produtos[i].fornecedor.emailFornecedor[j]<<endl;
+            }
+            cout<<"Situacao: "<<produtos[i].situacaoProduto<<endl;
+            cout<<endl;
+        }
+    }
+}
+
+
 int main(){
     int capacidade, tamanho;
     int opcao;
@@ -198,7 +298,8 @@ int main(){
     tamanho = 0; 
 
     produto *produtos = new produto[capacidade];
-    preencheEmail(produtos, capacidade);
+    ofstream arquivo("arquivo.dat");
+    preencheEstrutura(produtos, capacidade);
 
     do{
         escreveMenu();
@@ -216,13 +317,28 @@ int main(){
                 cadastraProduto(produtos, tamanho); 
             }
         } else if (opcao == 2){
-            cout<<"Informe o codigo do produto desejado: "<<endl;
+            cout<<"Informe o codigo do produto desejado: ";
             cin>>codBusca;
-			consultaProduto(produtos, 0, tamanho, codBusca);
+            consultaProduto(produtos, tamanho, codBusca);
         } else if (opcao == 3){
             escreveProdutoCadastrado(produtos, tamanho);
+        } else if (opcao == 4){
+            cout<<"Informe o codigo do produto a ser excluido: ";
+            cin>>codBusca;
+            excluiProduto(produtos, tamanho, codBusca);
+        } else if (opcao == 5){
+            cout<<"Informe o codigo do produto a ser vendido: ";
+            cin>>codBusca;
+            efetuaVenda(produtos, tamanho, codBusca);
+        } else if (opcao == 6){
+            escreveProdutoAtivo(produtos, tamanho);
+        } else if (opcao == 7){
+            if (arquivo){            
+                arquivo.write((const char *) (produtos), tamanho*sizeof(produto));
+                arquivo.close();
+                cout<<"Dados exportados com sucesso!"<<endl;
+            }
         }
-
     } while (opcao != 8);
     delete [] produtos;
     return 0;
