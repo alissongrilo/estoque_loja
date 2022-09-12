@@ -1,11 +1,13 @@
-/*
+/* 
+
 Disciplina: Introducao aos Algoritmos
 Nomes: Alisson Grilo, Diogo Carrer e Matheus Megale
-Professora: Juliana Greghi
+Professora Dra. Juliana Greghi
 
 Enunciado 3 - Estoque Loja
 
 github: https://github.com/alissongrilo/estoque_loja 
+
 */
 
 #include <iostream>
@@ -90,10 +92,8 @@ void quickSort(produto produtos[], int primeiro, int ultimo){
 }
 
 
-/* 
--> Preenche campos da estrutura (email e qtdProdutoVendido) com
-valores neutros a fim de se evitar lixo computacional no output de dados 
-*/
+/* Preenche campos da estrutura (email e qtdProdutoVendido) com
+valores neutros a fim de se evitar lixo computacional no output de dados */
 void preencheEstrutura(produto produtos[], int capacidade){ 
     for (int i = capacidade-3; i<capacidade; i++){
         for (int j = 0; j<2; j++){
@@ -132,10 +132,8 @@ int buscaBinaria(produto produtos[], int inicio, int tamanho, string codBusca, b
 }
 
 
-/* 
--> CodProduto eh registro único portanto nao admite valores iguais.
--> Verifica se há algum codProduto na base semelhante ao codigo de cadastro desejado  
-*/
+/* CodProduto eh registro único portanto nao admite valores iguais.
+Verifica se há algum codProduto na base semelhante ao codigo de cadastro desejado */
 bool ehCadastrado(produto produtos[], string auxiliar, int &tamanho){
     for(int j=0; j<tamanho; j++){
         if (auxiliar == produtos[j].codProduto) return 1;
