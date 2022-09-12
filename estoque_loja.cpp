@@ -57,6 +57,9 @@ void quickSort(produto produtos[], int primeiro, int ultimo){
         while (produtos[j].codProduto > pivo)
             j--;
 
+
+        //Troca as informacoes de todos os atributos nas posicoes I e J
+        //Garante integridade dos dados
         if (i <= j){
             swap(produtos[i].codProduto, produtos[j].codProduto);
             swap(produtos[i].descricaoProduto, produtos[j].descricaoProduto);
@@ -82,6 +85,10 @@ void quickSort(produto produtos[], int primeiro, int ultimo){
 }
 
 
+/* 
+-> Preenche campos da estrutura (email e qtdProdutoVendido) com
+valores neutros a fim de se evitar lixo computacional no output de dados 
+*/
 void preencheEstrutura(produto produtos[], int capacidade){ 
     for (int i = capacidade-3; i<capacidade; i++){
         for (int j = 0; j<2; j++){
@@ -120,6 +127,10 @@ int buscaBinaria(produto produtos[], int inicio, int tamanho, string codBusca, b
 }
 
 
+/* 
+-> CodProduto eh registro único portanto nao admite valores iguais.
+-> Verifica se há algum codProduto na base semelhante ao codigo de cadastro desejado  
+*/
 bool ehCadastrado(produto produtos[], string auxiliar, int &tamanho){
     for(int j=0; j<tamanho; j++){
         if (auxiliar == produtos[j].codProduto) return 1;
@@ -171,6 +182,8 @@ void cadastraProduto(produto produtos[], int &tamanho){
 
         cout<<"Cadastro efetuado com sucesso!"<<endl;
         tamanho++;
+        //Tamanho passado por referencia sempre incrementa 1 a cada insercao de dados
+        //Variavel que dita o tamanho da estrutura em todo o codigo
     }
 }
 
@@ -187,6 +200,7 @@ void consultaProduto(produto produtos[], int tamanho, string codBusca){
     int indice;
     bool achou = false;
 
+    //Garante que estrutura estara sempre ordenada para realizar buscaBinaria.
     quickSort (produtos, 0, tamanho-1);
 
     indice = buscaBinaria(produtos, 0, tamanho, codBusca, achou);
@@ -199,6 +213,7 @@ void consultaProduto(produto produtos[], int tamanho, string codBusca){
 
 
 void escreveProdutoCadastrado(produto produtos[], int tamanho){
+    //Garante que produtos cadastrados serao escritos de forma ordenada.
     quickSort (produtos, 0, tamanho-1);
     
     for (int i = 0; i<tamanho; i++){
@@ -221,10 +236,12 @@ void excluiProduto(produto produtos[], int tamanho, string codBusca){
     bool achou = false;
     int confirmacao;
 
+    //Garante que estrutura estara sempre ordenada para realizar buscaBinaria.
     quickSort (produtos, 0, tamanho-1);
 
     indice = buscaBinaria(produtos, 0, tamanho, codBusca, achou);
 
+    //Nao eh possivel excluir itens nao cadastrados ou caracterizados como inativos
     if (!achou or produtos[indice].situacaoProduto == "Inativo"){
         cout<<"Produto nao cadastrado ou inativo"<<endl;
     } else{
@@ -248,6 +265,7 @@ void efetuaVenda(produto produtos[], int tamanho, string codBusca){
     int indice;
     bool achou = false;
 
+    //Garante que estrutura estara sempre ordenada para realizar buscaBinaria.
     quickSort (produtos, 0, tamanho-1);
     
     indice = buscaBinaria(produtos, 0, tamanho, codBusca, achou);
@@ -278,6 +296,7 @@ void efetuaVenda(produto produtos[], int tamanho, string codBusca){
 
 
 void escreveProdutoAtivo(produto produtos[], int tamanho){
+    //Garante que produtos cadastrados serao escritos de forma ordenada.
     quickSort (produtos, 0, tamanho-1);
     
     for (int i = 0; i<tamanho; i++){
@@ -312,6 +331,8 @@ int main(){
         cin>>opcao;
         
         if (opcao == 1){
+            //Verifica se há espaço na estrutura para insercao de dados
+            //Caso nao, redimensiona a estrutura e cadastrada logo apos.
             if (tamanho < capacidade){
                 cadastraProduto(produtos, tamanho);
             } else {
