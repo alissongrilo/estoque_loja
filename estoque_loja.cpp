@@ -1,7 +1,12 @@
-//Disciplina: Introducao aos Algoritmos
-//Nomes: Alisson Grilo, Diogo Carrer e Matheus Megale
-//Professora: Juliana Greghi
-//Enunciado 3 - Estoque Loja
+/*
+Disciplina: Introducao aos Algoritmos
+Nomes: Alisson Grilo, Diogo Carrer e Matheus Megale
+Professora: Juliana Greghi
+
+Enunciado 3 - Estoque Loja
+
+github: https://github.com/alissongrilo/estoque_loja 
+*/
 
 #include <iostream>
 #include <stdlib.h>
